@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voltgrid | Симулятор электрика</title>
+<meta name="description" content="Voltgrid — симулятор электрика с элементами экономической стратегии.">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --panel: #141414;
+    --border: #2a2a2a;
+    --accent: #facc15;
+    --accent-dim: rgba(250, 204, 21, 0.08);
+    --text: #e5e5e5;
+    --text-muted: #888888;
+    --font-mono: 'Courier New', Courier, monospace;
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.25;
+    z-index: -1;
+    pointer-events: none;
+    animation: gridPan 60s linear infinite;
+  }
+
+  @keyframes gridPan {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(40px, 40px); }
+  }
+
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 5%;
+    border-bottom: 1px solid var(--border);
+    background: rgba(13, 13, 13, 0.85);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    transition: border-color 0.3s;
+  }
+
+  .logo {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .logo-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 18px;
+    background: var(--accent);
+    animation: blink 1.2s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-family: var(--font-mono);
+    position: relative;
+    transition: color 0.3s var(--ease-out-expo);
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 0.3s var(--ease-out-expo);
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+  .nav-links a:hover::after { width: 100%; }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .hero {
+    padding: 140px 0 100px;
+    text-align: left;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 4px;
+    margin-bottom: 28px;
+    background: var(--accent-dim);
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid var(--accent);
+    animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+    max-width: fit-content;
+  }
+
+  @keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+
+  @keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: var(--accent) }
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 28px;
+    letter-spacing: -1.5px;
+    opacity: 0;
+    animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.5s forwards;
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.7s forwards;
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeSlideUp 0.8s var(--ease-out-expo) 0.9s forwards;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.3s var(--ease-out-expo);
+    border: 1px solid transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .btn-primary:hover {
+    background: #eab308;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px -10px rgba(250, 204, 21, 0.4);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+    font-family: var(--font-mono);
+  }
+
+  .btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-3px);
+  }
+
+  section {
+    padding: 100px 0;
+    border-top: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  h2::before {
+    content: '//';
+    color: var(--accent);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  @media (min-width: 768px) {
+    .about-grid { grid-template-columns: 2fr 1fr; }
+  }
+
+  .about-text p {
+    margin-bottom: 24px;
+    font-size: 1.05rem;
+    color: var(--text-muted);
+  }
+
+  .about-text strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .info-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    transition: border-color 0.3s;
+  }
+
+  .info-panel:hover {
+    border-color: var(--accent);
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    transition: color 0.2s;
+  }
+
+  .info-row:last-child { border-bottom: none; }
+  .info-row:hover { color: var(--text); }
+  .info-label { color: var(--text-muted); }
+  .info-value { color: var(--accent); text-align: right; }
+
+  /* Стили для списка платформ */
+  .platforms-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: right;
+  }
+
+  .platform-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    color: var(--accent);
+    font-size: 0.8rem;
+  }
+
+  .platform-icon {
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+
+  .features-list {
+    list-style: none;
+    display: grid;
+    gap: 24px;
+  }
+
+  .feature-item {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.3s var(--ease-out-expo);
+    cursor: default;
+  }
+
+  .feature-item:hover {
+    background: var(--panel);
+    border-color: var(--border);
+    transform: translateX(8px);
+  }
+
+  .feature-item:hover .feature-marker {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  .feature-marker {
+    min-width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: all 0.3s var(--ease-out-expo);
+  }
+
+  .feature-content h3 {
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .feature-content p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .download-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 40px;
+    margin-top: 20px;
+    transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s;
+  }
+
+  .download-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
+  }
+
+  .download-box h3 {
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+  }
+
+  .download-box p {
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  .version-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .version-tag::before {
+    content: '';
+    display: block;
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #22c55e;
+    animation: pulse-dot 2s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  footer {
+    padding: 80px 0;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-family: var(--font-mono);
+  }
+
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  footer a:hover { opacity: 0.8; }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s var(--ease-out-expo), transform 0.8s var(--ease-out-expo);
+  }
+
+  .reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .hero { padding: 100px 0 60px; }
+    h1 { font-size: 2.2rem; }
+    .tag { 
+      white-space: normal; 
+      border-right: none; 
+      animation: none;
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <span class="logo-cursor"></span>
+    VOLTGRID
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">О проекте</a></li>
+    <li><a href="#features">Механики</a></li>
+    <li><a href="#download">Сборки</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+  
+  <header class="hero">
+    <div class="tag">В РАЗРАБОТКЕ • РЕЛИЗ НА ЯНДЕКС ИГРАХ</div>
+    <h1>Симулятор электрика с элементами экономической стратегии.</h1>
+    <p>
+      Начни с добычи ресурсов, заработай первый капитал и открой свой бизнес в мегаполисе. 
+      Чини проводку, восстанавливай щитки и строй репутацию мастера, которому доверяют.
+    </p>
+    <div class="btn-group">
+      <a href="#download" class="btn btn-primary">Скачать тестовую сборку</a>
+      <a href="#about" class="btn btn-outline">Читать детали</a>
+    </div>
+  </header>
+
+  <section id="about" class="reveal">
+    <h2>О проекте</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>
+          <strong>Voltgrid</strong> — это попытка сделать честный и затягивающий симулятор, где ты не просто кликаешь по кнопкам, а действительно управляешь ресурсами и временем.
+        </p>
+        <p>
+          Игра начинается вдали от города: ты собираешь материалы и продаёшь их, чтобы накопить на переезд. В мегаполисе тебя ждут вызовы: от замены розетки до полного перепроектирования старой проводки в жилом комплексе.
+        </p>
+        <p>
+          Точная дата релиза пока не объявлена. Мы активно работаем над балансом и контентом, и нам важна обратная связь от ранних тестировщиков.
+        </p>
+      </div>
+      
+      <div class="info-panel reveal reveal-delay-1">
+        <div class="info-row">
+          <span class="info-label">Статус</span>
+          <span class="info-value">Активная разработка</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Платформы</span>
+          <div class="platforms-list">
+            <div class="platform-item">
+              <span class="platform-icon"></span> Windows
+            </div>
+            <div class="platform-item">
+              <span class="platform-icon"></span> Linux
+            </div>
+            <div class="platform-item">
+              <span class="platform-icon"></span> macOS
+            </div>
+            <div class="platform-item">
+              <span class="platform-icon"></span> Web (Yandex)
+            </div>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Жанр</span>
+          <span class="info-value">Симулятор</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Управление</span>
+          <span class="info-value">Мышь,клавиатура</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <h2 class="reveal">Ключевые механики</h2>
+    <ul class="features-list">
+      <li class="feature-item reveal reveal-delay-1">
+        <div class="feature-marker">01</div>
+        <div class="feature-content">
+          <h3>Экономика замкнутого цикла</h3>
+          <p>Сначала ты добываешь сырьё вручную, затем продаёшь его, чтобы купить инструменты для работы в городе. Каждое решение влияет на скорость прогресса.</p>
+        </div>
+      </li>
+      <li class="feature-item reveal reveal-delay-2">
+        <div class="feature-marker">02</div>
+        <div class="feature-content">
+          <h3>Уникальные задачи</h3>
+          <p>Каждый вызов — это головоломка. Нужно найти обрыв, перегрузку или неисправный автомат, используя логику и доступные инструменты.</p>
+        </div>
+      </li>
+      <li class="feature-item reveal reveal-delay-3">
+        <div class="feature-marker">03</div>
+        <div class="feature-content">
+          <h3>Система репутации</h3>
+          <p>Качество работы напрямую влияет на поток клиентов. Быстро и чисто сделанная работа открывает доступ к VIP-заказам в богатых районах.</p>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section id="download" class="reveal">
+    <h2>Тестирование</h2>
+    <div class="download-box">
+      <span class="version-tag">ПОСЛЕДНЯЯ ДОСТУПНАЯ ВЕРСИЯ: DEV BUILD</span>
+      <h3>Архив с текущими сборками</h3>
+      <p>
+        Поскольку игра находится в активной разработке, мы выкладываем рабочие билды для закрытого тестирования. 
+        В архиве доступны сборки для Windows, Linux и macOS. 
+        В этих версиях могут встречаться баги, непрожитый баланс и временные заглушки. 
+        Если вы нашли ошибку или у вас есть идеи по улучшению — мы будем рады обратной связи.
+      </p>
+      <a href="https://mega.nz/file/WixFEDAb#HXLM7XGG13WVAHJg_uj4hY82su2Uwi2Nxnb7_QhyLVI" target="_blank" class="btn btn-primary">
+        Скачать архив с MEGA
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>&copy; 2026 Voltgrid Project. Все права защищены.</p>
+  <p style="margin-top: 8px;">Следите за обновлениями на <a href="https://yandex.ru/games/" target="_blank">Яндекс Играх</a></p>
+</footer>
+
+<script>
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.15
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.reveal').forEach(el => {
+    observer.observe(el);
+  });
+
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
