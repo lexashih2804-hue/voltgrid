@@ -237,9 +237,23 @@
   .info-label { color: var(--text-muted); }
   .info-value { color: var(--accent); text-align: right; }
 
+  .count-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .live-dot {
+    width: 8px; height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--success);
+    animation: pulse-dot 2s infinite;
+  }
+
   .platforms-list { display: flex; flex-direction: column; gap: 4px; text-align: right; }
-  .platform-item { display: flex; align-items: center; justify-content: flex-end; gap: 8px; color: var(--accent); font-size: 0.8rem; }
-  .platform-icon { font-size: 0.75rem; opacity: 0.7; }
+  .platform-item { color: var(--accent); font-size: 0.8rem; }
 
   .features-list { list-style: none; display: grid; gap: 24px; }
 
@@ -277,8 +291,7 @@
   .feature-content h3 { font-size: 1.15rem; margin-bottom: 8px; font-weight: 600; color: var(--text); }
   .feature-content p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; }
 
-  /* === ФОРМА ДОСТУПА С 2FA === */
-  .download-box {
+  .download-box, .feedback-box {
     background: var(--panel);
     border: 1px solid var(--border);
     border-left: 3px solid var(--accent);
@@ -288,13 +301,13 @@
     transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s;
   }
 
-  .download-box:hover {
+  .download-box:hover, .feedback-box:hover {
     transform: translateY(-4px);
     box-shadow: 0 20px 40px -20px rgba(0,0,0,0.5);
   }
 
-  .download-box h3 { font-size: 1.4rem; margin-bottom: 16px; }
-  .download-box > p { color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem; line-height: 1.7; }
+  .download-box h3, .feedback-box h3 { font-size: 1.4rem; margin-bottom: 16px; }
+  .download-box > p, .feedback-box > p { color: var(--text-muted); margin-bottom: 32px; font-size: 0.95rem; line-height: 1.7; }
 
   .version-tag {
     font-family: var(--font-mono);
@@ -322,10 +335,11 @@
     100% { opacity: 1; transform: scale(1); }
   }
 
-  .access-form { display: grid; gap: 20px; margin-top: 24px; }
+  /* === ФОРМА ОБРАТНОЙ СВЯЗИ === */
+  .feedback-box form { display: grid; gap: 18px; }
 
-  .form-step { display: none; gap: 20px; grid-template-columns: 1fr; }
-  .form-step.active { display: grid; animation: fadeSlideUp 0.5s var(--ease-out-expo) forwards; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .row2 { grid-template-columns: 1fr; } }
 
   .form-group { display: flex; flex-direction: column; gap: 8px; }
 
@@ -340,15 +354,16 @@
   .form-group label .required { color: var(--error); margin-left: 2px; }
 
   .form-input {
+    width: 100%;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 14px 16px;
+    padding: 12px 14px;
     color: var(--text);
     font-family: var(--font-mono);
     font-size: 0.95rem;
-    transition: border-color 0.3s var(--ease-out-expo), box-shadow 0.3s;
     outline: none;
+    transition: border-color 0.3s var(--ease-out-expo), box-shadow 0.3s;
   }
 
   .form-input:focus {
@@ -357,6 +372,11 @@
   }
 
   .form-input::placeholder { color: #555; }
+
+  textarea.form-input { resize: vertical; min-height: 120px; line-height: 1.6; }
+
+  select.form-input { appearance: none; cursor: pointer; }
+
   .form-input.error {
     border-color: var(--error);
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
@@ -376,14 +396,14 @@
     background: var(--accent);
     color: #000;
     border: none;
-    padding: 16px 28px;
+    padding: 14px 28px;
     border-radius: 6px;
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
     font-family: var(--font-sans);
     transition: all 0.3s var(--ease-out-expo);
-    margin-top: 8px;
+    justify-self: start;
   }
 
   .submit-btn:hover:not(:disabled) {
@@ -392,81 +412,15 @@
     box-shadow: 0 10px 30px -10px rgba(250, 204, 21, 0.4);
   }
 
-  .code-box {
-    background: var(--accent-dim);
-    border: 1px dashed var(--accent);
-    padding: 20px;
-    border-radius: 6px;
-    text-align: center;
-    margin-bottom: 10px;
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .fb-status {
     font-family: var(--font-mono);
+    font-size: 0.85rem;
+    min-height: 20px;
   }
-
-  .code-box .code {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 6px;
-    margin-top: 8px;
-  }
-
-  .code-box .hint {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-top: 8px;
-  }
-
-  .success-message {
-    display: none;
-    margin-top: 24px;
-    padding: 24px;
-    background: rgba(34, 197, 94, 0.08);
-    border: 1px solid var(--success);
-    border-radius: 6px;
-    animation: slideDown 0.5s var(--ease-out-expo);
-  }
-
-  .success-message.visible { display: block; }
-
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .success-message h4 {
-    color: var(--success);
-    font-size: 1.1rem;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .success-message p {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 16px;
-    line-height: 1.6;
-  }
-
-  .success-message .download-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--accent);
-    text-decoration: none;
-    font-family: var(--font-mono);
-    font-weight: 600;
-    padding: 10px 20px;
-    border: 1px solid var(--accent);
-    border-radius: 6px;
-    transition: all 0.3s var(--ease-out-expo);
-  }
-
-  .success-message .download-link:hover {
-    background: var(--accent);
-    color: #000;
-  }
+  .fb-status.ok { color: var(--success); }
+  .fb-status.err { color: var(--error); }
 
   .social-links {
     display: flex;
@@ -526,7 +480,7 @@
     h1 { font-size: 2.2rem; }
     .tag { white-space: normal; border-right: none; animation: none; width: 100%; }
     .social-links { gap: 20px; }
-    .download-box { padding: 24px; }
+    .download-box, .feedback-box { padding: 24px; }
   }
 </style>
 </head>
@@ -540,7 +494,8 @@
   <ul class="nav-links">
     <li><a href="#about">О проекте</a></li>
     <li><a href="#features">Механики</a></li>
-    <li><a href="#download">Доступ</a></li>
+    <li><a href="#download">Сборки</a></li>
+    <li><a href="#feedback">Обратная связь</a></li>
   </ul>
 </nav>
 
@@ -554,7 +509,7 @@
       Чини проводку, восстанавливай щитки и строй репутацию мастера, которому доверяют.
     </p>
     <div class="btn-group">
-      <a href="#download" class="btn btn-primary">Получить доступ к тесту</a>
+      <a href="#download" class="btn btn-primary">Скачать тестовую сборку</a>
       <a href="#about" class="btn btn-outline">Читать детали</a>
     </div>
   </header>
@@ -582,10 +537,10 @@
         <div class="info-row">
           <span class="info-label">Платформы</span>
           <div class="platforms-list">
-            <div class="platform-item"><span class="platform-icon"></span> Windows</div>
-            <div class="platform-item"><span class="platform-icon"></span> Linux</div>
-            <div class="platform-item"><span class="platform-icon"></span> macOS</div>
-            <div class="platform-item"><span class="platform-icon"></span> Web (Yandex)</div>
+            <div class="platform-item">Windows</div>
+            <div class="platform-item">Linux</div>
+            <div class="platform-item">macOS</div>
+            <div class="platform-item">Web (Yandex)</div>
           </div>
         </div>
         <div class="info-row">
@@ -596,12 +551,11 @@
           <span class="info-label">Управление</span>
           <span class="info-value">Мышь, клавиатура</span>
         </div>
-        <!-- НОВАЯ СТРОКА: РЕАЛЬНАЯ СТАТИСТИКА -->
         <div class="info-row">
           <span class="info-label">Скачиваний</span>
-          <span class="info-value" id="download-count" style="display: flex; align-items: center; gap: 6px; justify-content: flex-end;">
-            <span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span>
-            Загрузка...
+          <span class="info-value count-wrap">
+            <span class="live-dot"></span>
+            <span id="countValue">—</span>
           </span>
         </div>
       </div>
@@ -636,77 +590,59 @@
   </section>
 
   <section id="download" class="reveal">
-    <h2>Закрытое тестирование</h2>
+    <h2>Тестирование</h2>
     <div class="download-box">
-      <span class="version-tag">ЗАПРОС ДОСТУПА К DEV BUILD</span>
-      <h3>Получить доступ к игре</h3>
+      <span class="version-tag">ПОСЛЕДНЯЯ ДОСТУПНАЯ ВЕРСИЯ</span>
+      <h3>Архив с текущими сборками</h3>
       <p>
-        Игра находится в активной разработке. Чтобы получить ссылку на архив с тестовой сборкой, 
-        пройди двухэтапную регистрацию. Мы используем эти данные только для связи с тестировщиками.
+        Поскольку игра находится в активной разработке, мы выкладываем рабочие билды для закрытого тестирования. 
+        В архиве доступны сборки для Windows, Linux и macOS. 
+        В этих версиях могут встречаться баги, непрожитый баланс и временные заглушки. 
+        Если вы нашли ошибку или у вас есть идеи по улучшению — мы будем рады обратной связи.
       </p>
+      <a href="https://mega.nz/file/WixFEDAb#HXLM7XGG13WVAHJg_uj4hY82su2Uwi2Nxnb7_QhyLVI" target="_blank" class="btn btn-primary" id="megaDownloadLink">
+        Скачать архив с MEGA
+      </a>
+    </div>
+  </section>
 
-      <form class="access-form" id="accessForm" novalidate>
-        
-        <!-- ШАГ 1: Основные данные -->
-        <div class="form-step active" id="step1">
+  <section id="feedback" class="reveal">
+    <h2>Обратная связь</h2>
+    <div class="feedback-box">
+      <span class="version-tag">ОТВЕЧАЮ ОБЫЧНО В ТЕЧЕНИЕ ПАРЫ ДНЕЙ</span>
+      <h3>Нашёл баг? Есть идея?</h3>
+      <p>
+        Напиши прямо здесь — сообщение придёт мне на почту. Можно без церемоний: что сломалось, где и после чего.
+        Любая деталь помогает делать игру лучше.
+      </p>
+      <form id="feedbackForm" novalidate>
+        <div class="row2">
           <div class="form-group">
-            <label for="login">Логин <span class="required">*</span></label>
-            <input type="text" id="login" class="form-input" placeholder="Ваш логин" autocomplete="username">
-            <span class="error-message" id="loginError">Введите логин (минимум 3 символа)</span>
+            <label for="fbName">Ник или имя</label>
+            <input class="form-input" id="fbName" type="text" placeholder="Как к тебе обращаться" autocomplete="nickname">
           </div>
-
           <div class="form-group">
-            <label for="password">Пароль <span class="required">*</span></label>
-            <input type="password" id="password" class="form-input" placeholder="Придумайте пароль" autocomplete="new-password">
-            <span class="error-message" id="passwordError">Пароль должен содержать минимум 6 символов</span>
+            <label for="fbContact">Контакт для ответа (необязательно)</label>
+            <input class="form-input" id="fbContact" type="text" placeholder="email, telegram или телефон" autocomplete="email">
           </div>
-
-          <div class="form-group">
-            <label for="email">Email <span class="required">*</span></label>
-            <input type="email" id="email" class="form-input" placeholder="example@mail.com" autocomplete="email">
-            <span class="error-message" id="emailError">Введите корректный email</span>
-          </div>
-
-          <button type="button" class="submit-btn" id="btnStep1">Получить код подтверждения</button>
         </div>
-
-        <!-- ШАГ 2: 2FA (Телефон + Код) -->
-        <div class="form-step" id="step2">
-          <div class="code-box">
-            <div>Ваш код подтверждения:</div>
-            <div class="code" id="mockCode">----</div>
-            <div class="hint">(в демо-режиме код показан здесь вместо SMS)</div>
-          </div>
-
-          <div class="form-group">
-            <label for="phone">Номер телефона <span class="required">*</span></label>
-            <input type="tel" id="phone" class="form-input" placeholder="+375 (XX) XXX-XX-XX" autocomplete="tel">
-            <span class="error-message" id="phoneError">Введите корректный номер телефона</span>
-          </div>
-
-          <div class="form-group">
-            <label for="smsCode">Код из SMS <span class="required">*</span></label>
-            <input type="text" id="smsCode" class="form-input" placeholder="0000" maxlength="4" style="text-align: center; letter-spacing: 6px; font-size: 1.2rem;" autocomplete="one-time-code">
-            <span class="error-message" id="smsCodeError">Неверный код подтверждения</span>
-          </div>
-
-          <button type="button" class="submit-btn" id="btnStep2">Подтвердить и получить доступ</button>
-          <button type="button" class="btn-outline" style="width: 100%; margin-top: 10px; text-align: center; justify-content: center;" id="btnBack">← Назад к данным</button>
+        <div class="form-group">
+          <label for="fbTopic">Тема</label>
+          <select class="form-input" id="fbTopic">
+            <option>Баг в сборке</option>
+            <option>Идея / предложение</option>
+            <option>Вопрос по игре</option>
+            <option>Другое</option>
+          </select>
         </div>
-
+        <div class="form-group">
+          <label for="fbMessage">Сообщение <span class="required">*</span></label>
+          <textarea class="form-input" id="fbMessage" rows="5" placeholder="Опиши проблему или идею. Чем подробнее, тем лучше."></textarea>
+          <span class="error-message" id="fbMessageError">Напиши хотя бы пару слов</span>
+        </div>
+        <button type="submit" class="submit-btn" id="fbSubmit">Отправить</button>
+        <div class="fb-status" id="fbStatus"></div>
       </form>
-
-      <!-- ШАГ 3: Успех -->
-      <div class="success-message" id="successMessage">
-        <h4>✓ Доступ подтверждён</h4>
-        <p>
-          Спасибо за регистрацию! Тестовая сборка доступна по ссылке ниже.<br>
-          Копия заявки сохранена. Если у вас есть вопросы, пишите на <strong style="color: var(--accent);">katsmaus242@gmail.com</strong>.
-        </p>
-        <a href="https://mega.nz/file/WixFEDAb#HXLM7XGG13WVAHJg_uj4hY82su2Uwi2Nxnb7_QhyLVI" target="_blank" class="download-link" id="megaDownloadLink">
-          ⬇ Скачать архив с MEGA
-        </a>
-      </div>
     </div>
   </section>
 
@@ -728,7 +664,7 @@
     </a>
   </div>
   <p>&copy; 2026 Voltgrid Project. Все права защищены.</p>
-  <p style="margin-top: 8px;">Связь с разработкой: <a href="mailto:katsmaus242@gmail.com">katsmaus242@gmail.com</a></p>
+  <p style="margin-top: 8px;">Почта для связи: <a href="mailto:katsmaus242@gmail.com">katsmaus242@gmail.com</a></p>
   <p style="margin-top: 8px;">Следите за обновлениями на <a href="https://yandex.ru/games/" target="_blank">Яндекс Играх</a></p>
 </footer>
 
@@ -754,119 +690,103 @@
     });
   });
 
-  // === ЛОГИКА 2FA ФОРМЫ ===
-  const step1 = document.getElementById('step1');
-  const step2 = document.getElementById('step2');
-  const btnStep1 = document.getElementById('btnStep1');
-  const btnStep2 = document.getElementById('btnStep2');
-  const btnBack = document.getElementById('btnBack');
-  const mockCodeEl = document.getElementById('mockCode');
-  const successMessage = document.getElementById('successMessage');
-  const accessForm = document.getElementById('accessForm');
-  
-  let generatedCode = '';
-
-  function isValidEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
-  function isValidPhone(phone) { return /^[\+]?[0-9\s\-\(\)]{10,}$/.test(phone); }
-
-  function showError(input, errorEl) { input.classList.add('error'); errorEl.classList.add('visible'); }
-  function hideError(input, errorEl) { input.classList.remove('error'); errorEl.classList.remove('visible'); }
-
-  ['login', 'password', 'email', 'phone', 'smsCode'].forEach(id => {
-    document.getElementById(id).addEventListener('input', function() {
-      hideError(this, document.getElementById(id + 'Error'));
-    });
-  });
-
-  btnStep1.addEventListener('click', () => {
-    let valid = true;
-    const login = document.getElementById('login');
-    const password = document.getElementById('password');
-    const email = document.getElementById('email');
-
-    if (login.value.trim().length < 3) { showError(login, document.getElementById('loginError')); valid = false; }
-    if (password.value.length < 6) { showError(password, document.getElementById('passwordError')); valid = false; }
-    if (!isValidEmail(email.value.trim())) { showError(email, document.getElementById('emailError')); valid = false; }
-
-    if (valid) {
-      generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
-      mockCodeEl.textContent = generatedCode;
-      
-      step1.classList.remove('active');
-      setTimeout(() => {
-        step1.style.display = 'none';
-        step2.style.display = 'grid';
-        setTimeout(() => step2.classList.add('active'), 50);
-      }, 300);
-    }
-  });
-
-  btnBack.addEventListener('click', () => {
-    step2.classList.remove('active');
-    setTimeout(() => {
-      step2.style.display = 'none';
-      step1.style.display = 'grid';
-      setTimeout(() => step1.classList.add('active'), 50);
-    }, 300);
-  });
-
-  btnStep2.addEventListener('click', () => {
-    let valid = true;
-    const phone = document.getElementById('phone');
-    const smsCode = document.getElementById('smsCode');
-
-    if (!isValidPhone(phone.value.trim())) { showError(phone, document.getElementById('phoneError')); valid = false; }
-    if (smsCode.value.trim() !== generatedCode) { showError(smsCode, document.getElementById('smsCodeError')); valid = false; }
-
-    if (valid) {
-      localStorage.setItem('voltgrid_access', 'granted');
-      accessForm.style.display = 'none';
-      successMessage.classList.add('visible');
-      successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  });
-
-  if (localStorage.getItem('voltgrid_access') === 'granted') {
-    accessForm.style.display = 'none';
-    successMessage.classList.add('visible');
-  }
-
-  // === РЕАЛЬНАЯ СТАТИСТИКА СКАЧИВАНИЙ ===
+  // === СЧЁТЧИК СКАЧИВАНИЙ ===
   const countNamespace = 'voltgrid-official';
   const countKey = 'downloads';
-  const countEl = document.getElementById('download-count');
+  const countValue = document.getElementById('countValue');
   const megaDownloadLink = document.getElementById('megaDownloadLink');
+
+  function animateCount(target) {
+    const start = performance.now();
+    const dur = 1200;
+    function frame(t) {
+      const p = Math.min((t - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      countValue.textContent = Math.round(target * eased).toLocaleString('ru-RU');
+      if (p < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
 
   async function updateCounter(isHit = false) {
     try {
-      // Используем бесплатный публичный API для подсчета кликов
       const endpoint = isHit ? 'hit' : 'get';
       const response = await fetch(`https://api.countapi.xyz/${endpoint}/${countNamespace}/${countKey}`);
       const data = await response.json();
-      
-      // Форматируем число с пробелами (например, 1 234)
-      countEl.innerHTML = `<span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span> ${data.value.toLocaleString('ru-RU')}`;
+      animateCount(data.value);
     } catch (error) {
-      console.warn('Счетчик API недоступен, используем локальный фолбэк', error);
-      // Если API не работает, показываем реалистичное число из localStorage
       let localCount = parseInt(localStorage.getItem('voltgrid_local_downloads') || '142');
       if (isHit) {
         localCount++;
         localStorage.setItem('voltgrid_local_downloads', localCount);
       }
-      countEl.innerHTML = `<span style="width: 8px; height: 8px; background: var(--success); border-radius: 50%; display: inline-block;"></span> ${localCount.toLocaleString('ru-RU')}`;
+      animateCount(localCount);
     }
   }
 
-  // 1. Загружаем текущее значение при открытии страницы
   updateCounter(false);
-
-  // 2. При клике на кнопку скачивания увеличиваем счетчик на +1
   if (megaDownloadLink) {
-    megaDownloadLink.addEventListener('click', () => {
-      updateCounter(true);
-    });
+    megaDownloadLink.addEventListener('click', () => updateCounter(true));
   }
+
+  // === ОБРАТНАЯ СВЯЗЬ ===
+  const FB_EMAIL = 'katsmaus242@gmail.com';
+  const feedbackForm = document.getElementById('feedbackForm');
+  const fbMessage = document.getElementById('fbMessage');
+  const fbSubmit = document.getElementById('fbSubmit');
+  const fbStatus = document.getElementById('fbStatus');
+
+  fbMessage.addEventListener('input', function () {
+    this.classList.remove('error');
+    document.getElementById('fbMessageError').classList.remove('visible');
+  });
+
+  feedbackForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const message = fbMessage.value.trim();
+    if (message.length < 5) {
+      fbMessage.classList.add('error');
+      document.getElementById('fbMessageError').classList.add('visible');
+      return;
+    }
+
+    const payload = {
+      name: document.getElementById('fbName').value.trim() || 'Аноним',
+      contact: document.getElementById('fbContact').value.trim() || 'не указан',
+      topic: document.getElementById('fbTopic').value,
+      message: message,
+      _subject: 'Voltgrid: ' + document.getElementById('fbTopic').value + ' (с сайта)',
+      _captcha: 'false'
+    };
+
+    fbSubmit.disabled = true;
+    fbStatus.className = 'fb-status';
+    fbStatus.textContent = 'Отправляю...';
+
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/' + FB_EMAIL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      feedbackForm.reset();
+      fbStatus.className = 'fb-status ok';
+      fbStatus.textContent = 'Сообщение отправлено. Спасибо! Отвечу на указанный контакт.';
+    } catch (err) {
+      // Запасной вариант: открываем почтовую программу с готовым письмом
+      const subject = encodeURIComponent(payload._subject);
+      const body = encodeURIComponent(
+        'Имя: ' + payload.name + '\nКонтакт: ' + payload.contact + '\nТема: ' + payload.topic + '\n\n' + payload.message
+      );
+      window.location.href = 'mailto:' + FB_EMAIL + '?subject=' + subject + '&body=' + body;
+      fbStatus.className = 'fb-status err';
+      fbStatus.textContent = 'Автоотправка не прошла — открылась почтовая программа. Отправь письмо из неё.';
+    } finally {
+      fbSubmit.disabled = false;
+    }
+  });
 </script>
 
 </body>
